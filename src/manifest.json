@@ -5,7 +5,8 @@
     "background_page" : "background.html",
     "content_scripts": [
         {
-            "matches": ["http://gatherer.wizards.com/Pages/Card/Details.aspx*"],
+            "matches": ["http://gatherer.wizards.com/Pages/Card/Details.aspx*",
+						"http://gatherer.wizards.com/pages/card/Details.aspx*"],
             "css": ["style.css"],
             "js": ["jquery-1.6.2.min.js", "myscript.js"],
             "run_at":"document_end"
