@@ -1,0 +1,17 @@
+{
+    "name": "Add To Deck",
+    "description": "Helps you add cards to your deck.",
+    "version": "0.1",
+    "background_page" : "background.html",
+    "content_scripts": [
+        {
+            "matches": ["http://gatherer.wizards.com/Pages/Card/Details.aspx*"],
+            "css": ["style.css"],
+            "js": ["jquery-1.6.2.min.js", "myscript.js"],
+            "run_at":"document_end"
+        }
+    ],
+    "permissions": [
+        "http://bandinglanding.appspot.com/"
+    ]
+}

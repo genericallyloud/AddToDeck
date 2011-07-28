@@ -1,0 +1,29 @@
+#add-card-button{
+    position:absolute;
+    top:105px;left:66px;
+    width:100px;
+    height:100px;
+    background-color:black;
+    border-radius:10px;
+    cursor:pointer;
+    opacity:.3;
+}
+#add-card-button:hover{
+    opacity:.5;
+}
+#plus-vertical-bar{
+    height:80px;
+    width:20px;
+    left:40px;
+    top:10px;
+}
+#plus-horizontal-bar{
+    height:20px;
+    width:80px;
+    top:40px;
+    left:10px;
+}
+#plus-vertical-bar,#plus-horizontal-bar{
+    position:absolute;
+    background-color:white;
+}
