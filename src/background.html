@@ -15,13 +15,13 @@
        * @param sender Object Origin of the request.
        * @param callback Function The method to call when the request completes.
        */
-      function onRequest(cardUploadJson, sender, callback) {
+      function uploadCard(cardUploadJson, sender, callback) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(data) {
           if (xhr.readyState == 4) {
             if (xhr.status == 200) {
               var data = xhr.responseText;//JSON.parse(xhr.responseText);
-              callback(data);
+              callback(JSON.parse(data));
             } else {
               callback(null);
             }
@@ -34,9 +34,42 @@
         xhr.setRequestHeader("Content-Type","application/json");
         xhr.send(JSON.stringify(cardUploadJson));
       };
+      
+      function checkStatus(cardName, sender, callback) {
+          var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function(data) {
+            if (xhr.readyState == 4) {
+              if (xhr.status == 200) {
+                var data = xhr.responseText;//JSON.parse(xhr.responseText);
+                callback(JSON.parse(data));
+              } else {
+                callback(null);
+              }
+            }
+          }
+          // Note that any URL fetched here must be matched by a permission in
+          // the manifest.json file!
+          var url = 'http://bandinglanding.appspot.com/rest/card-status?cardName='+cardName;
+          xhr.open('GET', url, true);
+          xhr.setRequestHeader("Content-Type","application/json");
+          xhr.send();
+        };
+      
+      function actionDispatch(message, sender, callback){
+          var action;
+          switch(message.action){
+              case "UPLOAD":
+                action = uploadCard;
+                break;
+              case "STATUS":
+                action = checkStatus;
+                break;
+          }
+          action(message.data, sender, callback);
+      };
 
       // Wire up the listener.
-      chrome.extension.onRequest.addListener(onRequest);
+      chrome.extension.onRequest.addListener(actionDispatch);
     </script>
   </body>
 </html>

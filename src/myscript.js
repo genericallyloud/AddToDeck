@@ -1,5 +1,17 @@
 (function($){
-
+    //closure scoped variables
+    var currentStatus;
+    var cardName;
+    
+    function setCurrentStatus(cardStatusDto){
+        console.log(cardStatusDto);
+        currentStatus = cardStatusDto;
+        if(cardStatusDto.card){
+            //put a count in the button
+            $("#card-added-count").text("x" + cardStatusDto.card.count);
+        }
+    }
+    
     function getBase64Image(img) {
         // Create an empty canvas element
         var canvas = document.createElement("canvas");
@@ -18,15 +30,22 @@
     
         return dataURL.replace(/^data:image\/(png|jpeg);base64,/, "");
     }
-
-    function addToDeck(){
+    
+    function getCardName(){
+        return $(".cardDetails .row").has(".label:contains('Card Name')").find(".value").text().trim();
+    }
+    
+    function getCardUploadJson(){
+        if(currentStatus.cardStatus != 'UPLOAD_AND_ADD'){
+            return {name:cardName};
+        }
         var cardInfo = $(".cardDetails .row");
         function textForLabel(label){
             return cardInfo.has(".label:contains('" + label + "')").find(".value").text().trim();
         }
         //get all the basic text stuff
         var cardUploadJson = {
-            name:textForLabel("Card Name"),
+            name:cardName,
             types:textForLabel("Types"),
             flavorText:textForLabel("Flavor Text"),
             powerToughness:textForLabel("P/T"),
@@ -69,20 +88,65 @@
         //now that the textual data is sucked in, lets get that image
         var img = $(".cardDetails .leftCol img").get(0);
         cardUploadJson.imageData = getBase64Image(img);
-        console.log(cardUploadJson);
-        chrome.extension.sendRequest(cardUploadJson, function(response){
-            console.log(response);
+        return cardUploadJson;
+    }
+    
+    function performAction(message){
+        chrome.extension.sendRequest(message, function(response){
+            if(response && response.cardStatus){
+                setCurrentStatus(response);
+            }else{
+                alert("Failed. Make sure you're logged in and shit. " + response);
+            }
+            $("#add-card-button").removeClass("loading");
         });
     }
     
+    function addToDeck(){
+        var button = $("#add-card-button");
+        if(button.hasClass("loading")){
+            return; //do nothing when loading
+        }
+        //give some feedback first
+        button.addClass("loading");
+        performAction({
+            action:"UPLOAD",
+            data:getCardUploadJson()
+        });
+        
+    }
+    
     $(document).ready(function(){
+        //go ahead and throw the button up - start it loading
         $(".cardDetails .leftCol")
             .append(
-                "<div id='add-card-button'>" +
+                "<div id='add-card-button' class='loading'>" +
                     "<div id='plus-vertical-bar'></div>" +
                     "<div id='plus-horizontal-bar'></div>" +
+                    '<div id="card-added-count"></div>' +
+                    '<div class="spinner">' +
+                        '<div class="bar1"></div>' +
+                        '<div class="bar2"></div>' +
+                        '<div class="bar3"></div>' +
+                        '<div class="bar4"></div>' +
+                        '<div class="bar5"></div>' +
+                        '<div class="bar6"></div>' +
+                        '<div class="bar7"></div>' +
+                        '<div class="bar8"></div>' +
+                        '<div class="bar9"></div>' +
+                        '<div class="bar10"></div>' +
+                        '<div class="bar11"></div>' +
+                        '<div class="bar12"></div>' +
+                    '</div>' +
                 "</div>"
             );
+        //get the status of the card in your deck
+        cardName = getCardName();
+        var cardNameArg = encodeURI(cardName);
+        performAction({
+            action:"STATUS",
+            data:cardNameArg
+        });
         $("#add-card-button").click(addToDeck);
     });
     
